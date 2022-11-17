@@ -70,9 +70,67 @@ $(window).load(async function () {
 
 	//ipfs
 	const IPFS_URL = "https://ipfs.io/ipfs/";
-	const IPFS_API_URL = "ipfs.infura.io";
-	const ipfs = window.IpfsApi(IPFS_API_URL, "5001", { protocol: "https" }); // Connect to IPFS
+	//const IPFS_API_URL = "ipfs.infura.io";
+	//const ipfs = window.IpfsApi(IPFS_API_URL, "5001", { protocol: "https" }); // Connect to IPFS
+	
 
+
+	$("#btn_uploadfile").on("click", function () {
+		if ($("#uploadfile").val() == "") {
+			alert("대표이미지를 입력해주세요");
+			$("#uploadfile").focus();
+			return;
+		}
+
+
+		var file = document.getElementById("uploadfile").files[0];
+		var IPFS_URL = "https://ipfs.io/ipfs/";
+
+		if (file) {
+
+			var datas, xhr;
+
+			datas = new FormData();
+			datas.append('filename', $('#uploadfile')[0].files[0]);
+
+			//개인 서버 ( 언제까지 될지 모름 자체 서버 구성 하기 바람 )
+			$.ajax({
+				url: "https://ipfs.nx-innovation.shop/api/v0/add",
+				type: 'POST',
+				data: datas,
+				mimeType: 'multipart/form-data',
+				success: function (data) {
+
+					var data_hash = $.parseJSON(data);
+					console.log(data_hash);
+					console.log(data_hash['Hash']);
+					console.log(data_hash['Name']);
+					console.log(data_hash['Size']);
+
+
+					var hash_img_url = IPFS_URL + data_hash['Hash'];
+
+					//console.log(`Url --> ${ hash_img_url } `);
+					$("#ipfs_file_url").text(hash_img_url);
+					$("#ipfs_file_url").attr("href", hash_img_url);
+
+					$("#hash_img_url").val(hash_img_url);
+
+
+
+
+				},
+				error: function (jqXHR, textStatus, errorThrown) {
+					alert('ERRORS: ' + textStatus);
+				},
+				cache: false,
+				contentType: false,
+				processData: false
+			});
+		};
+	});
+
+	/** 인퓨라 유료 변경으로  주석
 	$("#btn_uploadfile").on("click", function () {
 		if ($("#uploadfile").val() == "") {
 			alert("대표이미지를 입력해주세요");
@@ -103,6 +161,7 @@ $(window).load(async function () {
 		//console.log($('input#uploadfile')[0].files[0]);
 		reader.readAsArrayBuffer($("input#uploadfile")[0].files[0]); // Read Provided File
 	});
+	**/
 
 	$("#bnt_mint").on("click", function () {
 		//https://docs.opensea.io/docs/metadata-standards
